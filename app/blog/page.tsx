@@ -2,63 +2,45 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CalendarDays, Clock } from "lucide-react"
+import { getMarkdownFiles } from "@/lib/content-utils" // Import the utility function
 
-// In a real application, you would dynamically load these from your markdown files
-const blogPosts = [
-  {
-    slug: "introduction-to-mlops",
-    title: "Introduction to MLOps: Bridging the Gap Between ML and Production",
-    description:
-      "Learn the fundamentals of MLOps and how to deploy machine learning models at scale with proper monitoring and governance.",
-    date: "2023-12-01",
-    readTime: "8 min read",
-    tags: ["MLOps", "DevOps", "Machine Learning"],
-    featured: true,
-  },
-  {
-    slug: "feature-engineering-techniques",
-    title: "Advanced Feature Engineering Techniques for Better ML Models",
-    description:
-      "Explore sophisticated feature engineering methods that can significantly improve your model performance.",
-    date: "2023-11-15",
-    readTime: "12 min read",
-    tags: ["Feature Engineering", "Data Science", "Python"],
-    featured: true,
-  },
-  {
-    slug: "bayesian-ab-testing",
-    title: "Bayesian A/B Testing: A More Intuitive Approach",
-    description:
-      "Understanding Bayesian methods for A/B testing and why they might be better than traditional frequentist approaches.",
-    date: "2023-10-20",
-    readTime: "10 min read",
-    tags: ["Statistics", "A/B Testing", "Bayesian"],
-    featured: false,
-  },
-  {
-    slug: "time-series-forecasting-guide",
-    title: "Complete Guide to Time Series Forecasting",
-    description:
-      "From ARIMA to Prophet to deep learning approaches - a comprehensive guide to time series forecasting.",
-    date: "2023-09-30",
-    readTime: "15 min read",
-    tags: ["Time Series", "Forecasting", "Python", "R"],
-    featured: false,
-  },
-  {
-    slug: "data-visualization-best-practices",
-    title: "Data Visualization Best Practices for Data Scientists",
-    description: "How to create compelling and informative visualizations that tell a story with your data.",
-    date: "2023-09-10",
-    readTime: "7 min read",
-    tags: ["Visualization", "Storytelling", "Design"],
-    featured: false,
-  },
-]
+// Define the expected structure for blog posts
+interface BlogPost {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  readTime?: string; // Optional, as it might not be in all markdown files
+  tags: string[];
+  featured?: boolean; // Optional
+  htmlContent?: string; // This will be populated by getMarkdownFiles
+}
 
-export default function BlogPage() {
-  const featuredPosts = blogPosts.filter((post) => post.featured)
-  const otherPosts = blogPosts.filter((post) => !post.featured)
+// Fetch blog posts using the utility function
+// This function will run on the server
+async function getBlogPosts(): Promise<BlogPost[]> {
+  const posts = await getMarkdownFiles("content/blog");
+  // Ensure all expected fields are present, providing defaults if necessary
+  return posts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    date: post.date,
+    readTime: post.readTime || "N/A", // Default readTime if not present
+    tags: post.tags || [],
+    featured: post.featured || false, // Default featured to false
+    htmlContent: post.htmlContent, // This will be used for the full post content
+  }));
+}
+
+export default async function BlogPage() {
+  const blogPosts = await getBlogPosts();
+
+  // Sort posts by date (descending) - getMarkdownFiles already does this, but good to be explicit if needed
+  // blogPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const featuredPosts = blogPosts.filter((post) => post.featured);
+  const otherPosts = blogPosts.filter((post) => !post.featured);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -85,10 +67,12 @@ export default function BlogPage() {
                       day: "numeric",
                     })}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {post.readTime}
-                  </div>
+                  {post.readTime && ( // Only display readTime if it exists
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {post.readTime}
+                    </div>
+                  )}
                 </div>
                 <CardTitle className="text-xl mb-2">
                   <Link href={`/blog/${post.slug}`} className="hover:text-blue-600 transition-colors">
@@ -127,10 +111,12 @@ export default function BlogPage() {
                       day: "numeric",
                     })}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {post.readTime}
-                  </div>
+                  {post.readTime && ( // Only display readTime if it exists
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {post.readTime}
+                    </div>
+                  )}
                 </div>
                 <CardTitle className="text-lg mb-2">
                   <Link href={`/blog/${post.slug}`} className="hover:text-blue-600 transition-colors">
@@ -142,7 +128,7 @@ export default function BlogPage() {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
+                    <Badge key={tag} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}

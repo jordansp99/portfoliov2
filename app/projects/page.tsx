@@ -3,50 +3,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Github } from "lucide-react"
+import { CalendarDays } from "lucide-react" // Import CalendarDays for date display
+import { getMarkdownFiles } from "@/lib/content-utils" // Import the utility function
 
-// In a real application, you would dynamically load these from your markdown files
-const projects = [
-  {
-    slug: "customer-churn-prediction",
-    title: "Customer Churn Prediction Model",
-    description:
-      "Machine learning model to predict customer churn with 94% accuracy using ensemble methods and feature engineering.",
-    tags: ["Python", "Scikit-learn", "XGBoost", "Pandas"],
-    date: "2023-11-15",
-    featured: true,
-  },
-  {
-    slug: "real-time-fraud-detection",
-    title: "Real-time Fraud Detection System",
-    description:
-      "Deployed a real-time fraud detection system processing 100k+ transactions per minute with sub-100ms latency.",
-    tags: ["Python", "Apache Kafka", "TensorFlow", "Docker"],
-    date: "2023-09-20",
-    featured: true,
-  },
-  {
-    slug: "nlp-sentiment-analysis",
-    title: "Multi-language Sentiment Analysis",
-    description:
-      "Built a sentiment analysis system supporting 12 languages using transformer models and transfer learning.",
-    tags: ["Python", "Transformers", "BERT", "FastAPI"],
-    date: "2023-07-10",
-    featured: false,
-  },
-  {
-    slug: "time-series-forecasting",
-    title: "Sales Forecasting Dashboard",
-    description:
-      "Interactive dashboard for sales forecasting using ARIMA and Prophet models with automated model selection.",
-    tags: ["R", "Shiny", "Prophet", "Plotly"],
-    date: "2023-05-15",
-    featured: false,
-  },
-]
+// Define the expected structure for projects
+interface Project {
+  slug: string;
+  title: string;
+  description: string;
+  tags: string[];
+  date: string;
+  featured?: boolean; // Optional
+  github?: string; // Optional
+  demo?: string; // Optional
+  htmlContent?: string; // This will be populated by getMarkdownFiles
+}
 
-export default function ProjectsPage() {
-  const featuredProjects = projects.filter((project) => project.featured)
-  const otherProjects = projects.filter((project) => !project.featured)
+// Fetch projects using the utility function
+// This function will run on the server
+async function getProjects(): Promise<Project[]> {
+  const projects = await getMarkdownFiles("content/projects");
+  // Ensure all expected fields are present, providing defaults if necessary
+  return projects.map(project => ({
+    slug: project.slug,
+    title: project.title,
+    description: project.description,
+    tags: project.tags || [],
+    date: project.date,
+    featured: project.featured || false, // Default featured to false
+    github: project.github,
+    demo: project.demo,
+    htmlContent: project.htmlContent, // This might be used on a detail page
+  }));
+}
+
+export default async function ProjectsPage() {
+  const projects = await getProjects();
+
+  // Sort projects by date (descending) - getMarkdownFiles already does this, but good to be explicit if needed
+  // projects.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const featuredProjects = projects.filter((project) => project.featured);
+  const otherProjects = projects.filter((project) => !project.featured);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -66,7 +64,11 @@ export default function ProjectsPage() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-xl mb-2">{project.title}</CardTitle>
+                    <CardTitle className="text-xl mb-2">
+                      <Link href={`/projects/${project.slug}`} className="hover:text-blue-600 transition-colors">
+                        {project.title}
+                      </Link>
+                    </CardTitle>
                     <CardDescription className="text-base">{project.description}</CardDescription>
                   </div>
                 </div>
@@ -83,12 +85,14 @@ export default function ProjectsPage() {
                   <Button asChild size="sm">
                     <Link href={`/projects/${project.slug}`}>View Details</Link>
                   </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href="#" target="_blank" rel="noreferrer">
-                      <Github className="h-4 w-4 mr-1" />
-                      Code
-                    </a>
-                  </Button>
+                  {project.github && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={project.github} target="_blank" rel="noreferrer">
+                        <Github className="h-4 w-4 mr-1" />
+                        Code
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -103,7 +107,11 @@ export default function ProjectsPage() {
           {otherProjects.map((project) => (
             <Card key={project.slug} className="h-full">
               <CardHeader>
-                <CardTitle className="text-lg mb-2">{project.title}</CardTitle>
+                <CardTitle className="text-lg mb-2">
+                  <Link href={`/projects/${project.slug}`} className="hover:text-blue-600 transition-colors">
+                    {project.title}
+                  </Link>
+                </CardTitle>
                 <CardDescription>{project.description}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -118,11 +126,13 @@ export default function ProjectsPage() {
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/projects/${project.slug}`}>View Details</Link>
                   </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <a href="#" target="_blank" rel="noreferrer">
-                      <Github className="h-4 w-4" />
-                    </a>
-                  </Button>
+                  {project.github && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={project.github} target="_blank" rel="noreferrer">
+                        <Github className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
