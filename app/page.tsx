@@ -25,7 +25,7 @@ export default function HomePage() {
             <Button asChild size="lg">
               <a href="/cv-jordan-speight.pdf" download>
                 <FileText className="mr-2 h-4 w-4" />
-                Download CV
+                Download Full CV
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
@@ -191,19 +191,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Download CV Button */}
-          <div className="text-center">
-            <Button
-              asChild
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              <a href="/cv-jordan-speight.pdf" download>
-                <FileText className="mr-2 h-4 w-4" />
-                Download Full CV
-              </a>
-            </Button>
-          </div>
         </div>
       </section>
     </div>
