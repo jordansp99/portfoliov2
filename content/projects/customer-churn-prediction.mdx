@@ -1,0 +1,184 @@
+---
+title: "Customer Churn Prediction Model"
+tags: ["Python", "Scikit-learn", "XGBoost", "Pandas"]
+github: "https://github.com/sarahchen/churn-prediction"
+demo: "https://churn-demo.example.com"
+featured: true
+---
+
+# Customer Churn Prediction Model
+
+A machine learning solution to predict customer churn with 94% accuracy using ensemble methods and advanced feature engineering techniques.
+
+## Overview
+
+Customer churn is a critical business metric that directly impacts revenue. This project develops a robust machine learning model to identify customers at risk of churning, enabling proactive retention strategies.
+
+## Problem Statement
+
+The telecommunications company was experiencing a 15% annual churn rate, resulting in significant revenue loss. The challenge was to:
+- Identify customers likely to churn before they leave
+- Understand the key factors driving churn
+- Provide actionable insights for retention campaigns
+
+## Data Analysis
+
+The dataset contained:
+- **Customer Demographics**: Age, gender, location
+- **Service Usage**: Call duration, data usage, service plans
+- **Billing Information**: Monthly charges, payment history
+- **Support Interactions**: Number of calls, complaint history
+
+### Key Insights from EDA
+
+\`\`\`python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Churn rate by customer tenure
+churn_by_tenure = df.groupby('tenure_months')['churn'].mean()
+plt.figure(figsize=(10, 6))
+churn_by_tenure.plot(kind='line')
+plt.title('Churn Rate by Customer Tenure')
+plt.xlabel('Tenure (Months)')
+plt.ylabel('Churn Rate')
+plt.show()
+\`\`\`
+
+## Feature Engineering
+
+Created several advanced features:
+- **Recency, Frequency, Monetary (RFM) scores**
+- **Usage trend features** (increasing/decreasing patterns)
+- **Customer lifetime value estimates**
+- **Interaction features** between demographics and usage
+
+\`\`\`python
+# Example: Creating usage trend features
+def calculate_usage_trend(df):
+    df['usage_trend'] = df.groupby('customer_id')['monthly_usage'].pct_change()
+    df['usage_volatility'] = df.groupby('customer_id')['monthly_usage'].rolling(3).std()
+    return df
+\`\`\`
+
+## Model Development
+
+### Approach
+Used an ensemble approach combining:
+1. **XGBoost** for handling mixed data types
+2. **Random Forest** for feature importance
+3. **Logistic Regression** for interpretability
+
+### Hyperparameter Optimization
+
+\`\`\`python
+from sklearn.model_selection import RandomizedSearchCV
+from xgboost import XGBClassifier
+
+# XGBoost hyperparameter tuning
+param_dist = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [3, 4, 5, 6],
+    'learning_rate': [0.01, 0.1, 0.2],
+    'subsample': [0.8, 0.9, 1.0]
+}
+
+xgb_random = RandomizedSearchCV(
+    XGBClassifier(),
+    param_distributions=param_dist,
+    n_iter=50,
+    cv=5,
+    scoring='f1',
+    random_state=42
+)
+\`\`\`
+
+## Results
+
+### Model Performance
+- **Accuracy**: 94.2%
+- **Precision**: 91.8%
+- **Recall**: 89.5%
+- **F1-Score**: 90.6%
+- **AUC-ROC**: 0.96
+
+### Feature Importance
+Top predictive features:
+1. Customer tenure (23%)
+2. Monthly charges (18%)
+3. Support call frequency (15%)
+4. Contract type (12%)
+5. Payment method (10%)
+
+## Model Interpretability
+
+Used SHAP (SHapley Additive exPlanations) for model interpretability:
+
+\`\`\`python
+import shap
+
+# Calculate SHAP values
+explainer = shap.TreeExplainer(xgb_model)
+shap_values = explainer.shap_values(X_test)
+
+# Plot feature importance
+shap.summary_plot(shap_values, X_test)
+\`\`\`
+
+## Deployment
+
+### API Development
+Created a FastAPI endpoint for real-time scoring:
+
+\`\`\`python
+from fastapi import FastAPI
+import joblib
+
+app = FastAPI()
+model = joblib.load('churn_model.pkl')
+
+@app.post("/predict")
+def predict_churn(customer_data: dict):
+    features = preprocess_features(customer_data)
+    probability = model.predict_proba([features])[0][1]
+    return {"churn_probability": probability}
+\`\`\`
+
+### Monitoring
+Implemented model monitoring to track:
+- Prediction accuracy over time
+- Feature drift detection
+- Model performance degradation alerts
+
+## Business Impact
+
+The deployed model has delivered significant business value:
+- **15% reduction** in overall churn rate
+- **$2.3M annual increase** in customer lifetime value
+- **40% improvement** in retention campaign efficiency
+- **ROI of 450%** within the first year
+
+## Lessons Learned
+
+1. **Feature engineering** was more impactful than model complexity
+2. **Business context** is crucial for feature creation
+3. **Model interpretability** is essential for stakeholder buy-in
+4. **Continuous monitoring** prevents model degradation
+
+## Future Enhancements
+
+- Implement real-time feature updates
+- Add customer segmentation for targeted interventions
+- Develop next-best-action recommendations
+- Integrate with marketing automation platforms
+
+## Technical Stack
+
+- **Languages**: Python, SQL
+- **ML Libraries**: Scikit-learn, XGBoost, SHAP
+- **Data Processing**: Pandas, NumPy
+- **Visualization**: Matplotlib, Seaborn, Plotly
+- **Deployment**: FastAPI, Docker, AWS
+- **Monitoring**: MLflow, Prometheus
+\`\`\`
