@@ -132,6 +132,65 @@ export default function HomePage() {
 
           {/* Publications Preview */}
 
+          {/* Publications Preview */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Publications
+            </h3>
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium text-sm mb-2">
+                    "Paper Title 1"
+                  </h4>
+                  <p className="text-xs text-gray-600 mb-3">
+                    <strong>J. Speight</strong>, et al. - <em>Journal of Example</em>, 2023
+                  </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="/papers/paper1.pdf" target="_blank" rel="noreferrer">
+                        <FileText className="h-3 w-3 mr-1" />
+                        PDF
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://example.com/paper1" target="_blank" rel="noreferrer">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Link
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium text-sm mb-2">
+                    "Paper Title 2"
+                  </h4>
+                  <p className="text-xs text-gray-600 mb-3">
+                    <strong>J. Speight</strong>, A. Coauthor - <em>Conference Proceedings</em>, 2024
+                  </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="/papers/paper2.pdf" target="_blank" rel="noreferrer">
+                        <FileText className="h-3 w-3 mr-1" />
+                        PDF
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://example.com/paper2" target="_blank" rel="noreferrer">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Link
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
           {/* Download CV Button */}
           <div className="text-center">
             <Button
